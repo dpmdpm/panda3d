@@ -29,6 +29,7 @@
 #endif
 
 #include "pnotify.h"
+#include "vector_uchar.h"
 
 #if defined(HAVE_PYTHON) && !defined(CPPPARSER)
 
@@ -136,6 +137,12 @@ typedef long Py_hash_t;
 #define FMTCHAR_BYTES "y"
 #else
 #define FMTCHAR_BYTES "s"
+#endif
+
+extern EXPCL_INTERROGATEDB PyTupleObject Dtool_EmptyTuple;
+
+#ifndef _PyObject_CallNoArg
+#define _PyObject_CallNoArg(func) PyObject_Call((func), (PyObject *)&Dtool_EmptyTuple, NULL)
 #endif
 
 using namespace std;
@@ -314,9 +321,9 @@ EXPCL_INTERROGATEDB bool _Dtool_CheckErrorOccurred();
 #endif
 
 #ifdef NDEBUG
-#define Dtool_CheckErrorOccurred() (_PyErr_OCCURRED() != NULL)
+#define Dtool_CheckErrorOccurred() (UNLIKELY(_PyErr_OCCURRED() != NULL))
 #else
-#define Dtool_CheckErrorOccurred() _Dtool_CheckErrorOccurred()
+#define Dtool_CheckErrorOccurred() (UNLIKELY(_Dtool_CheckErrorOccurred()))
 #endif
 
 EXPCL_INTERROGATEDB PyObject *Dtool_Raise_AssertionError();
@@ -333,6 +340,9 @@ EXPCL_INTERROGATEDB PyObject *_Dtool_Raise_BadArgumentsError();
 #define Dtool_Raise_BadArgumentsError(x) Dtool_Raise_TypeError("Arguments must match:\n" x)
 #endif
 
+// These functions are similar to Dtool_WrapValue, except that they also
+// contain code for checking assertions and exceptions when compiling with
+// NDEBUG mode on.
 EXPCL_INTERROGATEDB PyObject *_Dtool_Return_None();
 EXPCL_INTERROGATEDB PyObject *Dtool_Return_Bool(bool value);
 EXPCL_INTERROGATEDB PyObject *_Dtool_Return(PyObject *value);
@@ -459,18 +469,47 @@ EXPCL_INTERROGATEDB PyObject *
 map_deepcopy_to_copy(PyObject *self, PyObject *args);
 
 /**
- * This class is returned from properties that require a settable interface,
- * ie. something.children[i] = 3.
+ * These classes are returned from properties that require a subscript
+ * interface, ie. something.children[i] = 3.
  */
+struct Dtool_WrapperBase {
+  PyObject_HEAD;
+  PyObject *_self;
+  const char *_name;
+};
+
 struct Dtool_SequenceWrapper {
-  PyObject_HEAD
-  PyObject *_base;
+  Dtool_WrapperBase _base;
   lenfunc _len_func;
   ssizeargfunc _getitem_func;
   ssizeobjargproc _setitem_func;
 };
 
+struct Dtool_MappingWrapper {
+  Dtool_WrapperBase _base;
+  binaryfunc _getitem_func;
+  objobjargproc _setitem_func;
+};
+
+struct Dtool_SeqMapWrapper {
+  Dtool_MappingWrapper _map;
+  lenfunc _len_func;
+  ssizeargfunc _seq_getitem_func;
+  ssizeobjargproc _seq_setitem_func;
+};
+
+struct Dtool_GeneratorWrapper {
+  Dtool_WrapperBase _base;
+  iternextfunc _iternext_func;
+};
+
 EXPCL_INTERROGATEDB extern PyTypeObject Dtool_SequenceWrapper_Type;
+EXPCL_INTERROGATEDB extern PyTypeObject Dtool_MappingWrapper_Type;
+EXPCL_INTERROGATEDB extern PyTypeObject Dtool_SeqMapWrapper_Type;
+EXPCL_INTERROGATEDB extern PyTypeObject Dtool_GeneratorWrapper_Type;
+EXPCL_INTERROGATEDB extern PyTypeObject Dtool_StaticProperty_Type;
+
+EXPCL_INTERROGATEDB PyObject *Dtool_NewStaticProperty(PyTypeObject *obj, const PyGetSetDef *getset);
 
 /**
  * These functions check whether the arguments passed to a function conform to
@@ -511,7 +550,7 @@ ALWAYS_INLINE PyObject *Dtool_WrapValue(char value);
 ALWAYS_INLINE PyObject *Dtool_WrapValue(wchar_t value);
 ALWAYS_INLINE PyObject *Dtool_WrapValue(nullptr_t);
 ALWAYS_INLINE PyObject *Dtool_WrapValue(PyObject *value);
-ALWAYS_INLINE PyObject *Dtool_WrapValue(const std::vector<unsigned char> &value);
+ALWAYS_INLINE PyObject *Dtool_WrapValue(const vector_uchar &value);
 
 #if PY_MAJOR_VERSION >= 0x02060000
 ALWAYS_INLINE PyObject *Dtool_WrapValue(Py_buffer *value);

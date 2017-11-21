@@ -29,7 +29,7 @@
  */
 class EXPCL_PANDA_COLLIDE CollisionNode : public PandaNode {
 PUBLISHED:
-  CollisionNode(const string &name);
+  explicit CollisionNode(const string &name);
 
 protected:
   CollisionNode(const CollisionNode &copy);
@@ -75,6 +75,7 @@ PUBLISHED:
   MAKE_PROPERTY(collider_sort, get_collider_sort, set_collider_sort);
 
   INLINE static CollideMask get_default_collide_mask();
+  MAKE_PROPERTY(default_collide_mask, get_default_collide_mask);
 
 protected:
   virtual void compute_internal_bounds(CPT(BoundingVolume) &internal_bounds,

@@ -32,8 +32,9 @@ public:
   ALLOC_DELETED_CHAIN(AudioLoadRequest);
 
 PUBLISHED:
-  INLINE AudioLoadRequest(AudioManager *audio_manager, const string &filename,
-                          bool positional);
+  INLINE explicit AudioLoadRequest(AudioManager *audio_manager,
+                                   const string &filename,
+                                   bool positional);
 
   INLINE AudioManager *get_audio_manager() const;
   INLINE const string &get_filename() const;
@@ -41,6 +42,8 @@ PUBLISHED:
 
   INLINE bool is_ready() const;
   INLINE AudioSound *get_sound() const;
+
+  INLINE AudioSound *result() const;
 
 protected:
   virtual DoneStatus do_task();

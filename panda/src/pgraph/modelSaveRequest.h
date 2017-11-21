@@ -11,8 +11,8 @@
  * @date 2012-12-19
  */
 
-#ifndef MODELSAVEREQUEST
-#define MODELSAVEREQUEST
+#ifndef MODELSAVEREQUEST_H
+#define MODELSAVEREQUEST_H
 
 #include "pandabase.h"
 
@@ -33,10 +33,10 @@ public:
   ALLOC_DELETED_CHAIN(ModelSaveRequest);
 
 PUBLISHED:
-  ModelSaveRequest(const string &name,
-                   const Filename &filename,
-                   const LoaderOptions &options,
-                   PandaNode *node, Loader *loader);
+  explicit ModelSaveRequest(const string &name,
+                            const Filename &filename,
+                            const LoaderOptions &options,
+                            PandaNode *node, Loader *loader);
 
   INLINE const Filename &get_filename() const;
   INLINE const LoaderOptions &get_options() const;
@@ -46,12 +46,13 @@ PUBLISHED:
   INLINE bool is_ready() const;
   INLINE bool get_success() const;
 
+  INLINE bool result() const;
+
   MAKE_PROPERTY(filename, get_filename);
   MAKE_PROPERTY(options, get_options);
   MAKE_PROPERTY(node, get_node);
   MAKE_PROPERTY(loader, get_loader);
   MAKE_PROPERTY(ready, is_ready);
-  MAKE_PROPERTY(success, get_success);
 
 protected:
   virtual DoneStatus do_task();

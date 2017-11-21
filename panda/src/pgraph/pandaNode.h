@@ -234,6 +234,8 @@ PUBLISHED:
   INLINE static DrawMask get_all_camera_mask();
   INLINE bool is_overall_hidden() const;
   INLINE void set_overall_hidden(bool overall_hidden);
+  MAKE_PROPERTY(overall_bit, get_overall_bit);
+  MAKE_PROPERTY(all_camera_mask, get_all_camera_mask);
   MAKE_PROPERTY(overall_hidden, is_overall_hidden, set_overall_hidden);
 
   void adjust_draw_mask(DrawMask show_mask,
@@ -319,7 +321,7 @@ PUBLISHED:
   INLINE int get_fancy_bits(Thread *current_thread = Thread::get_current_thread()) const;
 
 PUBLISHED:
-  static PT(PandaNode) decode_from_bam_stream(const string &data, BamReader *reader = NULL);
+  static PT(PandaNode) decode_from_bam_stream(vector_uchar data, BamReader *reader = nullptr);
 
 protected:
   class BoundsData;

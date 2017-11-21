@@ -47,7 +47,7 @@
  */
 class EXPCL_PANDA_EVENT AsyncTaskManager : public TypedReferenceCount, public Namable {
 PUBLISHED:
-  AsyncTaskManager(const string &name);
+  explicit AsyncTaskManager(const string &name);
   BLOCKING virtual ~AsyncTaskManager();
 
   BLOCKING void cleanup();
@@ -155,6 +155,7 @@ private:
   friend class AsyncTaskChain::AsyncTaskChainThread;
   friend class AsyncTask;
   friend class AsyncTaskSequence;
+  friend class PythonTask;
 };
 
 INLINE ostream &operator << (ostream &out, const AsyncTaskManager &manager) {
